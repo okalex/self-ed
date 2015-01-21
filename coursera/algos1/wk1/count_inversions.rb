@@ -41,7 +41,7 @@ end
 require 'minitest/autorun'
 class TestCountInversions < Minitest::Test
   def test_count
-    arr = [1, 4, 3, 7, 5, 6, 8, 2]
+    arr = [1, 4, 3, 7, 5, 6, 2, 8]
     count = count_inversions(arr)
     assert(count == 8, "Incorrect count (#{count})")
   end
