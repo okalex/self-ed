@@ -85,8 +85,9 @@ class Array
       if i != j and self[j] < pivot
         self.swap!(i, j)
         i += 1
+      elsif self[j] < pivot
+        i += 1
       end
-      i += 1 if self[j] < pivot
       j += 1
     end
 
