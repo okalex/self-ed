@@ -1,3 +1,5 @@
+require 'byebug'
+
 # Divide and conquer algorithm
 def dc_count_inversions(arr)
   sorted, count = sort_and_count(arr)
@@ -7,10 +9,11 @@ end
 def sort_and_count(arr)
   return arr, 0 if arr.size <= 1
 
-  a, left_inversions  = sort_and_count(arr[0, (arr.size / 2.0).ceil])
-  b, right_inversions = sort_and_count(arr[(arr.size / 2.0).ceil, arr.size / 2])
-  c, split_inversions = merge_and_count_split(a, b)
-  return c, left_inversions + right_inversions + split_inversions
+  left, left_inversions  = sort_and_count(arr[0, (arr.size / 2.0).ceil])
+  right, right_inversions = sort_and_count(arr[(arr.size / 2.0).ceil, arr.size / 2])
+  sorted, split_inversions = merge_and_count_split(left, right)
+  total = left_inversions + right_inversions + split_inversions
+  return sorted, total
 end
 
 def merge_and_count_split(left, right)
@@ -22,16 +25,12 @@ def merge_and_count_split(left, right)
   r = right.first
   while l || r
     if !r.nil? && (l.nil? || r < l)
-      if !l.nil? && right_idx <= left_idx
-        split_inversions += left.length - left_idx
-      end
+      split_inversions += left.length - left_idx
       out << r
-
       right_idx += 1
       r = right[right_idx]
     else
       out << l
-
       left_idx += 1
       l = left[left_idx]
     end
@@ -59,40 +58,46 @@ def brute_count_inversions(arr)
   inversions
 end
 
-require 'minitest/autorun'
-require 'benchmark'
-class TestCountInversions < Minitest::Test
-  def test_count
-    arr = [1, 4, 3, 7, 5, 6, 2, 8]
-    count = dc_count_inversions(arr)
-    assert(count == 8, "Incorrect count (#{count})")
-    assert(count == brute_count_inversions(arr))
-  end
+#require 'minitest/autorun'
+#require 'benchmark'
+#class TestCountInversions < Minitest::Test
+  #def test_count
+    #arr = [1, 4, 3, 7, 5, 6, 2, 8]
+    #count = dc_count_inversions(arr)
+    #assert(count == 8, "Incorrect count (#{count})")
+    #assert(count == brute_count_inversions(arr))
+  #end
 
-  def test_performance
-    arr = (1..2**10).to_a.shuffle
+  #def test_performance
+    #arr = (1..2**10).to_a.shuffle
 
-    brute_bm = Benchmark.measure do
-      brute_count_inversions(arr)
-    end
+    #brute_bm = Benchmark.measure do
+      #brute_count_inversions(arr)
+    #end
 
-    dc_bm = Benchmark.measure do
-      dc_count_inversions(arr)
-    end
+    #dc_bm = Benchmark.measure do
+      #dc_count_inversions(arr)
+    #end
 
-    assert(dc_bm.total < brute_bm.total, 'Divde-and-conquer is not faster')
-  end
-end
+    #assert(dc_bm.total < brute_bm.total, 'Divde-and-conquer is not faster')
+  #end
+#end
 
-Benchmark.bm do |bm|
-  arr = (1..2**13).to_a.shuffle
-  bm.report("D & C:") { dc_count_inversions(arr) }
-  bm.report("Brute:") { brute_count_inversions(arr) }
-end
+#Benchmark.bm do |bm|
+  #arr = (1..2**13).to_a.shuffle
+  #bm.report("D & C:") { dc_count_inversions(arr) }
+  #bm.report("Brute:") { brute_count_inversions(arr) }
+#end
 
-Benchmark.bm do |bm|
-  (10..20).each do |exp|
-    arr = (1..2**exp).to_a.shuffle
-    bm.report("2^#{exp}:") { dc_count_inversions(arr) }
-  end
-end
+#Benchmark.bm do |bm|
+  #(10..20).each do |exp|
+    #arr = (1..2**exp).to_a.shuffle
+    #bm.report("2^#{exp}:") { dc_count_inversions(arr) }
+  #end
+#end
+
+puts "Loading file"
+strings = File.readlines("IntegerArray.txt")
+integers = strings.map(&:to_i)
+puts "Counting inversions"
+puts "#{dc_count_inversions(integers)} inversions"
