@@ -1,4 +1,9 @@
 class Array
+
+  def swap!(idx1, idx2)
+    self[idx1], self[idx2] = self[idx2], self[idx1]
+  end
+
   def quick_sort!(start = 0, len = self.size)
     return if len <= 1
 
@@ -12,7 +17,7 @@ class Array
         until self[right_idx] <= pivot or left_idx == right_idx + 1
           right_idx -= 1
         end
-        self[left_idx], self[right_idx] = self[right_idx], self[left_idx]
+        self.swap!(left_idx, right_idx)
         if self[left_idx] == pivot
           pivot_idx = left_idx
         else
@@ -36,17 +41,10 @@ class Array
   def quick_sort2!(start = 0, len = self.size)
     return if len <= 1
 
-    if len == 2
-      self[start], self[start + 1] = self[start + 1], self[start] if self[start] > self[start + 1]
-      return
-    end
-
     pivot_idx = start + rand(len)
     pivot = self[pivot_idx]
     #puts "(#{start}, #{len}) -> #{self.inspect}, [#{pivot_idx}] = #{pivot}"
-    unless pivot_idx == start
-      self[pivot_idx], self[start] = self[start], self[pivot_idx]
-    end
+    self.swap!(start, pivot_idx) unless pivot_idx == start
 
     left_idx  = start + 1
     right_idx = start + len - 1
@@ -54,7 +52,7 @@ class Array
       if self[left_idx] > pivot
         right_idx -= 1 until self[right_idx] < pivot or left_idx >= right_idx
         unless left_idx == right_idx
-          self[left_idx], self[right_idx] = self[right_idx], self[left_idx]
+          self.swap!(left_idx, right_idx)
           left_idx += 1
           right_idx -= 1
         end
@@ -63,12 +61,8 @@ class Array
       end
     end
 
-    # Hackey sack
-    if self[left_idx] > pivot
-      left_idx -= 1
-    end
-
-    self[start], self[left_idx] = self[left_idx], self[start]
+    left_idx -= 1 if self[left_idx] > pivot
+    self.swap!(start, left_idx)
     pivot_idx = left_idx
     #puts "          #{self.inspect}"
 
@@ -76,13 +70,42 @@ class Array
     self.quick_sort2!(pivot_idx + 1, start + len - pivot_idx - 1) unless start + len + 1 == pivot_idx
     self
   end
+
+  def quick_sort3!(start = 0, len = self.size)
+    return if len <= 1
+
+    pivot_idx = start + rand(len)
+    pivot = self[pivot_idx]
+    #puts "(#{start}, #{len}) -> #{self.inspect}, [#{pivot_idx}] = #{pivot}"
+    self.swap!(start, pivot_idx) unless pivot_idx == start
+
+    i = start + 1
+    j = start + 1
+    while j < start + len
+      if i != j and self[j] < pivot
+        self.swap!(i, j)
+        i += 1
+      end
+      i += 1 if self[j] < pivot
+      j += 1
+    end
+
+    pivot_idx = i - 1
+    self.swap!(start, pivot_idx)
+    #puts "          #{self.inspect}"
+
+    self.quick_sort3!(start, pivot_idx - start) unless start == pivot_idx
+    self.quick_sort3!(pivot_idx + 1, start + len - pivot_idx - 1) unless start + len + 1 == pivot_idx
+    self
+  end
+
 end
 
 require 'minitest/autorun'
 class TestQuickSort < Minitest::Test
   def test_correctness
-    arr = (1..1000).to_a.shuffle
-    arr.quick_sort2!
+    arr = (1..100000).to_a.shuffle
+    arr.quick_sort3!
     prev = 0
     arr.each do |cur|
       assert prev < cur, "Not sorted! #{prev} !< #{cur}"
@@ -93,12 +116,13 @@ end
 
 require 'benchmark'
 Benchmark.bm do |bm|
-  arr = (1..1000000).to_a.shuffle
+  arr = (1..100000).to_a.shuffle
   arr1 = arr.clone
   arr2 = arr.clone
   arr3 = arr.clone
 
-  bm.report("Ruby sort: ") { arr1.sort! }
-  bm.report("Quicksort1:") { arr2.quick_sort! }
-  bm.report("Quicksort2:") { arr3.quick_sort2! }
+  bm.report("Ruby sort: ") { arr.sort! }
+  bm.report("Quicksort1:") { arr1.quick_sort! }
+  bm.report("Quicksort2:") { arr2.quick_sort2! }
+  bm.report("Quicksort3:") { arr3.quick_sort3! }
 end
