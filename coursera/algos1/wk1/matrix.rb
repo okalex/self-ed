@@ -214,35 +214,39 @@ class TestMatrixMultiply < Minitest::Test
   end
 end
 
+require 'matrix'
 require 'benchmark'
 Benchmark.bm do |bm|
-  (5..7).each do |exp|
+  (5..10).each do |exp|
     arr = (1..2**exp*2**exp).to_a
     m = SquareMatrix.from_array(2**exp, arr)
 
-    SquareMatrix.mult = :dc
-    bm.report("D&C      #{2**exp}x#{2**exp}:") { m * m }
+    #SquareMatrix.mult = :dc
+    #bm.report("D&C      #{2**exp}x#{2**exp}:") { m * m }
     SquareMatrix.mult = :brute
     bm.report("Brute    #{2**exp}x#{2**exp}:") { m * m }
-    SquareMatrix.mult = :strassen
-    bm.report("Strassen #{2**exp}x#{2**exp}:") { m * m }
+    #SquareMatrix.mult = :strassen
+    #bm.report("Strassen #{2**exp}x#{2**exp}:") { m * m }
+
+    m = Matrix.build(2**exp, 2**exp) {|row, col| row * 2**exp + col }
+    bm.report("Ruby     #{2**exp}x#{2**exp}:") { m * m }
   end
 end
 puts ""
 
-require 'ruby-prof'
-m = SquareMatrix.new(64, 10)
-SquareMatrix.mult = :strassen
-RubyProf.start
-m * m
-result = RubyProf.stop
-printer = RubyProf::FlatPrinter.new(result)
-printer.print(STDOUT)
-puts ""
+#require 'ruby-prof'
+#m = SquareMatrix.new(64, 10)
+#SquareMatrix.mult = :strassen
+#RubyProf.start
+#m * m
+#result = RubyProf.stop
+#printer = RubyProf::FlatPrinter.new(result)
+#printer.print(STDOUT)
+#puts ""
 
-SquareMatrix.mult = :brute
-RubyProf.start
-m * m
-result = RubyProf.stop
-printer = RubyProf::FlatPrinter.new(result)
-printer.print(STDOUT)
+#SquareMatrix.mult = :brute
+#RubyProf.start
+#m * m
+#result = RubyProf.stop
+#printer = RubyProf::FlatPrinter.new(result)
+#printer.print(STDOUT)
