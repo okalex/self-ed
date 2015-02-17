@@ -106,7 +106,7 @@ require 'minitest/autorun'
 class TestQuickSort < Minitest::Test
   def test_correctness
     arr = (1..100000).to_a.shuffle
-    arr.quick_sort3!
+    arr.quick_sort2!
     prev = 0
     arr.each do |cur|
       assert prev < cur, "Not sorted! #{prev} !< #{cur}"
