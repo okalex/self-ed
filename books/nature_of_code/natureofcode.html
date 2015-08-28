@@ -5,17 +5,18 @@
 
 		<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 		<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-		<script src="vector.js"></script>
+		<script src="bundle.js"></script>
 	</head>
 
 	<body>
 		<h1>Nature of Code</h1>
 		<div class="controls">
-			<a class="start" href="#">Start</a>
-			<a class="stop" href="#">Stop</a>
+			<select id="example-select">
+				<option disabled selected> -- select an option -- </option>
+			</select>
 		</div>
 		<div class="container">
-			<div class="canvas"></div>
+			<div id="canvas"></div>
 		</div>
 	</body>
 </html>
