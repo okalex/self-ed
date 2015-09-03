@@ -200,6 +200,7 @@
 	'use strict';
 
 	var Vector = __webpack_require__(1);
+	var Thing = __webpack_require__(10);
 
 	var animReq = 0;
 
@@ -207,34 +208,33 @@
 
 		start: function start() {
 			var canvas = $('#canvas');
-			canvas.append('<div class="object circle red"></div>');
 
-			var circle = $('.circle').first();
-			var velocity = new Vector(225.0, 275.0);
+			var location = new Vector(100.0, 100.0);
+			var velocity = new Vector(200.0, 300.0);
+			var ball = new Thing(canvas, location, velocity);
 
-			var lastDraw = Date.now();
-			var timePassed = 0;
+			var lastRun = Date.now();
 
 			function draw() {
 				animReq = requestAnimationFrame(draw);
-
-				timePassed = Date.now() - lastDraw;
-
-				var curPos = new Vector(parseInt(circle.css('left')), parseInt(circle.css('top')));
-				var diff = velocity.scale(timePassed / 1000.0);
-				var nextPos = curPos.add(diff);
-
-				if (nextPos.x < 0 || nextPos.x + circle.width() >= canvas.width()) velocity.x *= -1;
-				if (nextPos.y < 0 || nextPos.y + circle.height() >= canvas.height()) velocity.y *= -1;
-
-				diff = velocity.scale(timePassed / 1000.0);
-				nextPos = curPos.add(diff);
-				circle.css('left', nextPos.x);
-				circle.css('top', nextPos.y);
-
-				lastDraw = Date.now();
+				ball.draw();
 			}
 
+			function run() {
+				var timePassed = Date.now() - lastRun;
+
+				var diff = velocity.scale(timePassed / 1000.0);
+				var nextPos = ball.location.add(diff);
+
+				if (nextPos.x < 0 || nextPos.x + ball.width() >= canvas.width()) ball.velocity.x *= -1;
+				if (nextPos.y < 0 || nextPos.y + ball.height() >= canvas.height()) ball.velocity.y *= -1;
+
+				diff = ball.velocity.scale(timePassed / 1000.0);
+				ball.location = ball.location.add(diff);
+				lastRun = Date.now();
+			}
+
+			setInterval(run, 5);
 			draw();
 		},
 
@@ -468,6 +468,52 @@
 		}
 
 	};
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var Vector = __webpack_require__(1);
+
+	var Thing = (function () {
+		function Thing(world, location, velocity) {
+			_classCallCheck(this, Thing);
+
+			this.world = world;
+			this.el = $('<div class="object circle red"></div>').appendTo(world);
+
+			this.location = location;
+			this.velocity = velocity;
+		}
+
+		_createClass(Thing, [{
+			key: 'draw',
+			value: function draw() {
+				this.el.css('left', this.location.x);
+				this.el.css('top', this.location.y);
+			}
+		}, {
+			key: 'height',
+			value: function height() {
+				return this.el.height();
+			}
+		}, {
+			key: 'width',
+			value: function width() {
+				return this.el.width();
+			}
+		}]);
+
+		return Thing;
+	})();
+
+	module.exports = Thing;
 
 /***/ }
 /******/ ]);
