@@ -48,8 +48,8 @@
 
 	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
 
-	var examples = __webpack_require__(4);
-	var Case = __webpack_require__(6);
+	var examples = __webpack_require__(1);
+	var Case = __webpack_require__(5);
 
 	$(document).ready(function () {
 
@@ -78,13 +78,83 @@
 			if (curExample) curExample.stop();
 
 			var file = this.value;
-			curExample = __webpack_require__(2)("./" + file);
+			curExample = __webpack_require__(7)("./" + file);
 			curExample.start();
 		});
 	});
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./01_bounce.js": 2,
+		"./02_steer.js": 9,
+		"./03_follow.js": 10
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 1;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Vector = __webpack_require__(3);
+	var Thing = __webpack_require__(4);
+
+	var animReq = 0;
+
+	module.exports = {
+
+		start: function start() {
+			var canvas = $('#canvas');
+
+			var location = new Vector(100.0, 100.0);
+			var velocity = new Vector(200.0, 0.0);
+			var acceleration = new Vector(0.0, 5.0);
+			var ball = new Thing(canvas, location, velocity, acceleration);
+
+			var lastUpdate = Date.now();
+
+			function draw() {
+				animReq = requestAnimationFrame(draw);
+				ball.draw();
+			}
+
+			function update() {
+				var timePassed = Date.now() - lastUpdate;
+				ball.update(timePassed);
+				lastUpdate = Date.now();
+			}
+
+			setInterval(update, 1);
+			draw();
+		},
+
+		stop: function stop() {
+			if (animReq) {
+				cancelAnimationFrame(animReq);
+				animReq = 0;
+			}
+		}
+
+	};
+
+/***/ },
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -170,108 +240,81 @@
 	module.exports = Vector;
 
 /***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./01_bounce": 3,
-		"./01_bounce.js": 3,
-		"./02_bounce2": 9,
-		"./02_bounce2.js": 9
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 2;
-
-
-/***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Vector = __webpack_require__(1);
-	var Thing = __webpack_require__(10);
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var animReq = 0;
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	module.exports = {
+	var Vector = __webpack_require__(3);
 
-		start: function start() {
-			var canvas = $('#canvas');
+	var Thing = (function () {
+		function Thing(world, location, velocity, acceleration) {
+			_classCallCheck(this, Thing);
 
-			var location = new Vector(100.0, 100.0);
-			var velocity = new Vector(200.0, 300.0);
-			var ball = new Thing(canvas, location, velocity);
+			this.world = world;
+			this.el = $('<div class="object circle red"></div>').appendTo(world);
 
-			var lastRun = Date.now();
-
-			function draw() {
-				animReq = requestAnimationFrame(draw);
-				ball.draw();
-			}
-
-			function run() {
-				var timePassed = Date.now() - lastRun;
-
-				var diff = velocity.scale(timePassed / 1000.0);
-				var nextPos = ball.location.add(diff);
-
-				if (nextPos.x < 0 || nextPos.x + ball.width() >= canvas.width()) ball.velocity.x *= -1;
-				if (nextPos.y < 0 || nextPos.y + ball.height() >= canvas.height()) ball.velocity.y *= -1;
-
-				diff = ball.velocity.scale(timePassed / 1000.0);
-				ball.location = ball.location.add(diff);
-				lastRun = Date.now();
-			}
-
-			setInterval(run, 5);
-			draw();
-		},
-
-		stop: function stop() {
-			if (animReq) {
-				cancelAnimationFrame(animReq);
-				animReq = 0;
-			}
+			this.location = location;
+			this.velocity = velocity;
+			this.acceleration = acceleration;
+			this.followee = null;
 		}
 
-	};
+		_createClass(Thing, [{
+			key: 'update',
+			value: function update(timePassed) {
+				if (this.followee) {
+					this.acceleration = this.followee.sub(this.location).scale(0.5).limit(5.0);
+				}
+
+				this.velocity = this.velocity.add(this.acceleration).limit(600.0);
+				var diff = this.velocity.scale(timePassed / 1000.0);
+				var nextPos = this.location.add(diff);
+
+				if (nextPos.x < 0 || nextPos.x + this.width() >= this.world.width()) {
+					this.velocity.x *= -.95;
+				}
+				if (nextPos.y < 0 || nextPos.y + this.height() >= this.world.height()) {
+					this.velocity.y *= -.95;
+				}
+
+				diff = this.velocity.scale(timePassed / 1000.0);
+				this.location = this.location.add(diff);
+			}
+		}, {
+			key: 'draw',
+			value: function draw() {
+				this.el.css('left', this.location.x);
+				this.el.css('top', this.location.y);
+			}
+		}, {
+			key: 'height',
+			value: function height() {
+				return this.el.height();
+			}
+		}, {
+			key: 'width',
+			value: function width() {
+				return this.el.width();
+			}
+		}, {
+			key: 'follow',
+			value: function follow(point) {
+				this.followee = point;
+			}
+		}]);
+
+		return Thing;
+	})();
+
+	module.exports = Thing;
 
 /***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./01_bounce.js": 3,
-		"./02_bounce2.js": 9
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 4;
-
-
-/***/ },
-/* 5 */,
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! Case - v1.2.1 - 2015-01-29
@@ -401,17 +444,43 @@
 	        Case.type(type, types[type]);
 	    }
 	    // export Case (AMD, commonjs, or global)
-	    var define = __webpack_require__(7);
+	    var define = __webpack_require__(6);
 	    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (typeof module === "object" && module.exports ? module.exports = Case : this.Case = Case), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 	}).call(this);
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./01_bounce": 2,
+		"./01_bounce.js": 2,
+		"./02_steer": 9,
+		"./02_steer.js": 9,
+		"./03_follow": 10,
+		"./03_follow.js": 10
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 7;
 
 
 /***/ },
@@ -421,51 +490,80 @@
 
 	'use strict';
 
-	var Vector = __webpack_require__(1);
+	var Vector = __webpack_require__(3);
+	var Thing = __webpack_require__(4);
 
 	var animReq = 0;
 
+	var KEY_LEFT = 37;
+	var KEY_UP = 38;
+	var KEY_RIGHT = 39;
+	var KEY_DOWN = 40;
+
 	module.exports = {
 
-		start: function start() {
-			var canvas = $('#canvas');
-			canvas.append('<div class="object circle red"></div>');
+	  start: function start() {
+	    var canvas = $('#canvas');
 
-			var circle = $('.circle').first();
-			var velocity = new Vector(425.0, 775.0);
+	    var location = new Vector(100.0, 100.0);
+	    var velocity = new Vector(0.0, 0.0);
+	    var acceleration = new Vector(0.0, 0.0);
+	    var ball = new Thing(canvas, location, velocity, acceleration);
 
-			var lastDraw = Date.now();
-			var timePassed = 0;
+	    function draw() {
+	      animReq = requestAnimationFrame(draw);
+	      ball.draw();
+	    }
 
-			function draw() {
-				animReq = requestAnimationFrame(draw);
+	    function update() {
+	      var timePassed = Date.now() - lastUpdate;
+	      ball.update(timePassed);
+	      lastUpdate = Date.now();
+	    }
 
-				timePassed = Date.now() - lastDraw;
+	    $(document).keydown(function (event) {
 
-				var curPos = new Vector(parseInt(circle.css('left')), parseInt(circle.css('top')));
-				var diff = velocity.scale(timePassed / 1000.0);
-				var nextPos = curPos.add(diff);
+	      var ACCEL = 2.0;
 
-				if (nextPos.x < 0 || nextPos.x + circle.width() >= canvas.width()) velocity.x *= -1;
-				if (nextPos.y < 0 || nextPos.y + circle.height() >= canvas.height()) velocity.y *= -1;
+	      switch (event.which) {
+	        case KEY_UP:
+	          event.preventDefault();
+	          ball.acceleration = new Vector(0.0, -ACCEL);
+	          break;
 
-				diff = velocity.scale(timePassed / 1000.0);
-				nextPos = curPos.add(diff);
-				circle.css('left', nextPos.x);
-				circle.css('top', nextPos.y);
+	        case KEY_DOWN:
+	          event.preventDefault();
+	          ball.acceleration = new Vector(0.0, ACCEL);
+	          break;
 
-				lastDraw = Date.now();
-			}
+	        case KEY_LEFT:
+	          event.preventDefault();
+	          ball.acceleration = new Vector(-ACCEL, 0.0);
+	          break;
 
-			draw();
-		},
+	        case KEY_RIGHT:
+	          event.preventDefault();
+	          ball.acceleration = new Vector(ACCEL, 0.0);
+	          break;
+	      }
+	    });
 
-		stop: function stop() {
-			if (animReq) {
-				cancelAnimationFrame(animReq);
-				animReq = 0;
-			}
-		}
+	    $(document).keyup(function (event) {
+	      event.preventDefault();
+	      ball.acceleration = new Vector(0.0, 0.0);
+	    });
+
+	    var lastUpdate = Date.now();
+	    setInterval(update, 1);
+	    draw();
+	  },
+
+	  stop: function stop() {
+	    if (animReq) {
+	      cancelAnimationFrame(animReq);
+	      animReq = 0;
+	    }
+	  }
 
 	};
 
@@ -475,45 +573,53 @@
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var Vector = __webpack_require__(3);
+	var Thing = __webpack_require__(4);
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	var animReq = 0;
 
-	var Vector = __webpack_require__(1);
+	module.exports = {
 
-	var Thing = (function () {
-		function Thing(world, location, velocity) {
-			_classCallCheck(this, Thing);
+	  start: function start() {
+	    var canvas = $('#canvas');
 
-			this.world = world;
-			this.el = $('<div class="object circle red"></div>').appendTo(world);
+	    var mouse = new Vector(0.0, 0.0);
+	    $(document).mousemove(function (event) {
+	      mouse.x = event.pageX - parseInt(canvas.css('left'));
+	      mouse.y = event.pageY - parseInt(canvas.css('top'));
+	    });
 
-			this.location = location;
-			this.velocity = velocity;
-		}
+	    var location = new Vector(100.0, 100.0);
+	    var velocity = new Vector(0.0, 0.0);
+	    var acceleration = new Vector(0.0, 0.0);
+	    var ball = new Thing(canvas, location, velocity, acceleration);
+	    ball.follow(mouse);
 
-		_createClass(Thing, [{
-			key: 'draw',
-			value: function draw() {
-				this.el.css('left', this.location.x);
-				this.el.css('top', this.location.y);
-			}
-		}, {
-			key: 'height',
-			value: function height() {
-				return this.el.height();
-			}
-		}, {
-			key: 'width',
-			value: function width() {
-				return this.el.width();
-			}
-		}]);
+	    var lastUpdate = Date.now();
 
-		return Thing;
-	})();
+	    function draw() {
+	      animReq = requestAnimationFrame(draw);
+	      ball.draw();
+	    }
 
-	module.exports = Thing;
+	    function update() {
+	      var timePassed = Date.now() - lastUpdate;
+	      ball.update(timePassed);
+	      lastUpdate = Date.now();
+	    }
+
+	    setInterval(update, 1);
+	    draw();
+	  },
+
+	  stop: function stop() {
+	    if (animReq) {
+	      cancelAnimationFrame(animReq);
+	      animReq = 0;
+	    }
+	  }
+
+	};
 
 /***/ }
 /******/ ]);

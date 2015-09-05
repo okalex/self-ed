@@ -1,17 +1,16 @@
 html, body {
-	height: 100%;
 	margin: 0;
-	padding: 0;
+	padding: 10px;
 }
 
 #canvas {
 	border: 1px solid #ccc;
-	bottom: 20px;
+	bottom: 40px;
 	box-sizing: border-box;
 	left: 20px;
 	position: absolute;
 	right: 20px;
-	top: 200px;
+	top: 140px;
 }
 
 .object {
